@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/bench.dir/benchmarks/bench.cpp.o -o bench  liblinalg_lib.a 

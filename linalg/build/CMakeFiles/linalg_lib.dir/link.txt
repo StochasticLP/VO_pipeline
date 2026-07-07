@@ -1,0 +1,2 @@
+/usr/bin/ar qc liblinalg_lib.a CMakeFiles/linalg_lib.dir/src/matrix.cpp.o CMakeFiles/linalg_lib.dir/src/vector3.cpp.o
+/usr/bin/ranlib liblinalg_lib.a

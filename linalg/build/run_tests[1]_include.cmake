@@ -1,0 +1,5 @@
+if(EXISTS "/home/luke/VO_pipeline/linalg/build/run_tests[1]_tests.cmake")
+  include("/home/luke/VO_pipeline/linalg/build/run_tests[1]_tests.cmake")
+else()
+  add_test(run_tests_NOT_BUILT run_tests_NOT_BUILT)
+endif()

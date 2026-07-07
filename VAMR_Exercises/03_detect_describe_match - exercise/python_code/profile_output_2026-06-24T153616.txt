@@ -1,0 +1,129 @@
+Timer unit: 1e-07 s
+
+Total time: 0.0018214 s
+File: C:\Users\ninja\OneDrive\Documents\Books\Robotics\Vision Algorithms for Mobile Robotics\Week 5\03_detect_describe_match - exercise\python_code\describe_keypoints.py
+Function: describeKeypoints at line 4
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+     4                                           @line_profiler.profile
+     5                                           def describeKeypoints(img, keypoints, r):
+     6                                               """
+     7                                               Returns a (2r+1)^2xN matrix of image patch vectors based on image img and a 2xN matrix containing the keypoint
+     8                                               coordinates. r is the patch "radius".
+     9                                               """
+    10         2         26.0     13.0      0.1      len = keypoints.shape[1]
+    11         2        691.0    345.5      3.8      descriptors = np.zeros((len, 2*r+1, 2*r+1))
+    12         2       5355.0   2677.5     29.4      img_padded = np.pad(img, r)
+    13                                               
+    14       402        611.0      1.5      3.4      for i in range(len):
+    15       400       1476.0      3.7      8.1          x = keypoints[1, i] + r
+    16       400       1542.0      3.9      8.5          y = keypoints[0, i] + r
+    17       400       8412.0     21.0     46.2          descriptors[i] = img_padded[y-r:y+r+1, x-r:x+r+1]
+    18                                               
+    19         2         98.0     49.0      0.5      descriptors = descriptors.reshape((len, (2*r+1)**2)).T
+    20         2          3.0      1.5      0.0      return descriptors
+
+Total time: 0.0100846 s
+File: C:\Users\ninja\OneDrive\Documents\Books\Robotics\Vision Algorithms for Mobile Robotics\Week 5\03_detect_describe_match - exercise\python_code\match_descriptors.py
+Function: matchDescriptors at line 5
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+     5                                           @line_profiler.profile
+     6                                           def matchDescriptors(query_descriptors, database_descriptors, match_lambda):
+     7                                               """
+     8                                               Returns a 1xQ matrix where the i-th coefficient is the index of the database descriptor which matches to the
+     9                                               i-th query descriptor. The descriptor vectors are MxQ and MxD where M is the descriptor dimension and Q and D the
+    10                                               amount of query and database descriptors respectively. matches(i) will be -1 if there is no database descriptor
+    11                                               with an SSD < lambda * min(SSD). No elements of matches will be equal except for the -1 elements.
+    12                                               """
+    13         1         15.0     15.0      0.0      len = query_descriptors.shape[1]
+    14         1        227.0    227.0      0.2      matches = np.full(len, -1)
+    15                                               
+    16         1      76086.0  76086.0     75.4      dist = cdist(query_descriptors.T, database_descriptors.T, 'sqeuclidean')
+    17                                               
+    18         1       4069.0   4069.0      4.0      min_dist = np.min(dist[dist > 0])
+    19         1         23.0     23.0      0.0      delta = match_lambda * min_dist
+    20                                               
+    21       201        365.0      1.8      0.4      for i in range(len):
+    22       200        753.0      3.8      0.7          idist = dist[i]
+    23       200        335.0      1.7      0.3          done = False
+    24       201        311.0      1.5      0.3          while not done:
+    25       201      14295.0     71.1     14.2              min_dist = np.min(idist)
+    26       201        491.0      2.4      0.5              if (min_dist > delta):
+    27       166        302.0      1.8      0.3                  done = True
+    28       166        325.0      2.0      0.3                  break
+    29        35       1535.0     43.9      1.5              j = np.argmin(idist)
+    30        35       1438.0     41.1      1.4              if j in matches:
+    31         1         21.0     21.0      0.0                  idist[j] = delta + 1
+    32                                                       else:
+    33        34        127.0      3.7      0.1                  matches[i] = j
+    34        34         64.0      1.9      0.1                  done = True
+    35        34         62.0      1.8      0.1                  break
+    36         1          2.0      2.0      0.0      return matches
+
+Total time: 0.0669484 s
+File: C:\Users\ninja\OneDrive\Documents\Books\Robotics\Vision Algorithms for Mobile Robotics\Week 5\03_detect_describe_match - exercise\python_code\harris.py
+Function: harris at line 11
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    11                                           @line_profiler.profile
+    12                                           def harris(img, patch_size, kappa):
+    13                                               """ Returns the harris scores for an image given a patch size and a kappa value
+    14                                                   The returned scores are of the same shape as the input image """
+    15                                                   
+    16                                           
+    17                                               #convolve sobel filter with image to produce I_x and I_y matrices
+    18         2     137710.0  68855.0     20.6      Ix = cv2.filter2D(img.astype(np.float64), -1, SOBEL_X)
+    19         2      46196.0  23098.0      6.9      Iy = cv2.filter2D(img.astype(np.float64), -1, SOBEL_Y)
+    20                                           
+    21                                               #compute I_x^2, I_y^2, I_xI_y
+    22         2       6345.0   3172.5      0.9      Ixx = Ix**2
+    23         2      20473.0  10236.5      3.1      Iyy = Iy**2
+    24         2      30180.0  15090.0      4.5      Ixy = Ix*Iy
+    25                                           
+    26                                               #compute sum I_x^2, sum I_y^2, sum I_xI_y
+    27                                               #uniform_filter is a separated implementation
+    28                                               
+    29         2     101576.0  50788.0     15.2      sum_Ixx = uniform_filter(Ixx, size=patch_size)
+    30         2      90150.0  45075.0     13.5      sum_Iyy = uniform_filter(Iyy, size=patch_size)
+    31         2      85963.0  42981.5     12.8      sum_Ixy = uniform_filter(Ixy, size=patch_size)
+    32                                           
+    33                                               #Compute eigenvalues using quadratic formula
+    34         2     130148.0  65074.0     19.4      score = (sum_Ixx * sum_Iyy - sum_Ixy**2) - kappa * (sum_Ixx + sum_Iyy)**2
+    35                                           
+    36                                               #make matrix original size of image
+    37         2         15.0      7.5      0.0      pad = 1 + patch_size // 2
+    38         2       8186.0   4093.0      1.2      score = np.pad(score, pad)
+    39         2      12539.0   6269.5      1.9      score[score < 0] = 0
+    40                                           
+    41         2          3.0      1.5      0.0      return score
+
+Total time: 0.0759333 s
+File: C:\Users\ninja\OneDrive\Documents\Books\Robotics\Vision Algorithms for Mobile Robotics\Week 5\03_detect_describe_match - exercise\python_code\select_keypoints.py
+Function: selectKeypoints at line 4
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+     4                                           @line_profiler.profile
+     5                                           def selectKeypoints(scores, num, r):
+     6                                               """
+     7                                               Selects the num best scores as keypoints and performs non-maximum supression of a (2r + 1)*(2r + 1) box around
+     8                                               the current maximum.
+     9                                               """    
+    10         2        182.0     91.0      0.0      keypoints = np.zeros((num, 2), dtype=int)
+    11                                           
+    12       402        772.0      1.9      0.1      for i in range(num):                                      
+    13       400     744348.0   1860.9     98.0          row, col = np.unravel_index(np.argmax(scores), scores.shape)
+    14       400       4882.0     12.2      0.6          keypoints[i] = [row, col]
+    15                                                   
+    16       400       9125.0     22.8      1.2          scores[row-r:row+r, col-r:col+r] = 0
+    17                                           
+    18         2         24.0     12.0      0.0      return keypoints.T
+
+  0.00 seconds - C:\Users\ninja\OneDrive\Documents\Books\Robotics\Vision Algorithms for Mobile Robotics\Week 5\03_detect_describe_match - exercise\python_code\describe_keypoints.py:4 - describeKeypoints
+  0.01 seconds - C:\Users\ninja\OneDrive\Documents\Books\Robotics\Vision Algorithms for Mobile Robotics\Week 5\03_detect_describe_match - exercise\python_code\match_descriptors.py:5 - matchDescriptors
+  0.07 seconds - C:\Users\ninja\OneDrive\Documents\Books\Robotics\Vision Algorithms for Mobile Robotics\Week 5\03_detect_describe_match - exercise\python_code\harris.py:11 - harris
+  0.08 seconds - C:\Users\ninja\OneDrive\Documents\Books\Robotics\Vision Algorithms for Mobile Robotics\Week 5\03_detect_describe_match - exercise\python_code\select_keypoints.py:4 - selectKeypoints

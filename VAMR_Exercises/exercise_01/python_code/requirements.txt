@@ -1,0 +1,12 @@
+cycler
+fonttools
+kiwisolver
+matplotlib
+numpy
+opencv-python
+packaging
+Pillow
+pyparsing
+python-dateutil
+six
+typing-extensions

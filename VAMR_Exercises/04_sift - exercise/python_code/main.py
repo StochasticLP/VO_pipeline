@@ -30,7 +30,10 @@ def main(rotation_invariant, rotation_img2_deg, contrast_threshold, sift_sigma,
         pass
         # Lets go and rotate the image
         # - get the original height and width
+        h, w = img2.shape
         # - create rotation matrix
+        c, s = np.cos(rotation_img2_deg), np.sin(rotation_img2_deg)
+        rotation_matrix = np.array([[c, -s],[s, c]])
         # - calculate the size of the rotated image
         # - pad the image
         # - rotate the image
@@ -39,6 +42,8 @@ def main(rotation_invariant, rotation_img2_deg, contrast_threshold, sift_sigma,
 
     # Actually compute the SIFT features. For both images do:
     # - construct the image pyramid
+    img1_pyramid = computeImagePyramid(img1, num_octaves)
+    img2_pyramid = computeImagePyramid(img2, num_octaves)
     # - compute the blurred images
     # - compute difference of gaussians
     # - extract the keypoints

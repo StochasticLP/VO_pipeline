@@ -21,8 +21,8 @@ def main(rotation_invariant, rotation_img2_deg, contrast_threshold, sift_sigma,
                 None, 0.0, 1.0, cv2.NORM_MINMAX)
     
     # Read in images
-    img1 = get_image("../data/img_1.jpg", rescale_factor)
-    img2 = get_image("../data/img_2.jpg", rescale_factor)
+    img1 = get_image("data/img_1.jpg", rescale_factor)
+    img2 = get_image("data/img_2.jpg", rescale_factor)
     
 
     # If we want to test our rotation invariant features, rotate the second image
@@ -42,11 +42,21 @@ def main(rotation_invariant, rotation_img2_deg, contrast_threshold, sift_sigma,
 
     # Actually compute the SIFT features. For both images do:
     # - construct the image pyramid
-    img1_pyramid = computeImagePyramid(img1, num_octaves)
-    img2_pyramid = computeImagePyramid(img2, num_octaves)
+    img1Pyr = computeImagePyramid(img1, num_octaves)
+    img2Pyr = computeImagePyramid(img2, num_octaves)
+    
     # - compute the blurred images
+    img1BlrdPyr = computeBlurredImages(img1Pyr, num_scales, sift_sigma)
+    img2BlrdPyr = computeBlurredImages(img2Pyr, num_scales, sift_sigma)
+    
     # - compute difference of gaussians
+    img1DoGPyr = computeDifferenceOfGaussians(img1BlrdPyr)
+    img2DoGPyr = computeDifferenceOfGaussians(img2BlrdPyr)
+    
     # - extract the keypoints
+    img1Keypoints = extractKeypoints(img1DoGPyr, contrast_threshold)
+    img2Keypoints = extractKeypoints(img2DoGPyr, contrast_threshold)
+    
     # - compute the descriptors
     imgs = [img1, img2]
     keypoint_locations = []
